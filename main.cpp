@@ -31,7 +31,7 @@ public:
         }
         length += d;
 
-        // vefify if snake went outside the window
+        // verify if snake went outside the window
         if (x < 0 || (x > GetScreenWidth() - length && direction == Dir::E) || y < 0 || (
                 y > GetScreenHeight() - length && direction == Dir::S)) {
             return 1;
@@ -56,12 +56,14 @@ class Snake {
 
 public:
     int width;
+    double speed; // pixels per second
     Color color;
     bool dead;
 
-    Snake(int initialLength, int width, Color color)
+    Snake(int initialLength, int width, double speed, Color color)
         : width{width},
           color{color},
+          speed{speed},
           dead{false} {
         blocks.push_back({20, 400, initialLength, Dir::E});
     }
@@ -72,7 +74,7 @@ public:
         }
     }
 
-    void move(double speed, double currentTime);
+    void move(double currentTime);
 
     void updateDir() {
         assert(blocks.back().length >= width);
@@ -92,7 +94,7 @@ public:
     }
 
 private:
-    Dir oposite(Dir dir) {
+    Dir opposite(Dir dir) {
         switch (dir) {
             case Dir::E: return Dir::W;
             case Dir::W: return Dir::E;
@@ -104,7 +106,7 @@ private:
 
     void turn(Dir newDir) {
         Block &head = blocks.back();
-        if (head.direction == newDir || head.direction == oposite(newDir)) { return;}
+        if (head.direction == newDir || head.direction == opposite(newDir)) { return; }
 
         head.length -= width;
         int newX = (head.direction == Dir::E) ? head.x + head.length : head.x;
@@ -120,11 +122,13 @@ private:
     }
 };
 
-void Snake::move(double speed, double currentTime) {
+void Snake::move(double currentTime) {
     currentTime += deltaTime;
     int d = int(round(speed * currentTime));
     double updateTime = d / speed;
     deltaTime = currentTime - updateTime;
+
+
 
     if (blocks.back().growTip(d) == 1) {
         dead = true;
@@ -147,29 +151,28 @@ void Snake::move(double speed, double currentTime) {
 }
 
 int main() {
-    InitWindow(800, 450, "snake");
+    InitWindow(0, 0, "snake");
     SetTargetFPS(30);
 
-    double speed = 100; // pixels per second
+    //double speed = 100; // pixels per second
 
-    SetWindowState(FLAG_WINDOW_RESIZABLE);
-    MaximizeWindow();
+    SetWindowState(FLAG_BORDERLESS_WINDOWED_MODE);
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    //MaximizeWindow();
     cout << IsWindowMaximized() << endl;
     cout << GetScreenHeight() << " " << GetScreenWidth() << endl;
     cout << GetRenderHeight() << " " << GetRenderWidth() << endl;
 
-    Snake snake{100, 20, DARKGREEN};
+    Snake snake{100, 20, 50, DARKGREEN};
     //blocks.push_back({200, 200, 100, Dir::E});
     // deque<Block> snake;
     // Dir direction{Dir::E};
 
     while (!WindowShouldClose()) {
-        //direction = updateDir(direction);
         double frameTime = GetFrameTime();
-        //updatePos(snake.at(0), direction, speed, frameTime);
         if (!snake.dead) {
             snake.updateDir();
-            snake.move(speed, frameTime);
+            snake.move(frameTime);
         }
 
         BeginDrawing();
