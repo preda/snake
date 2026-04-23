@@ -25,7 +25,7 @@ public:
             h = length;
             w = width;
         }
-        return{float(x), float(y), w, h};
+        return {float(x), float(y), w, h};
     }
 
     void draw(Color color) {
@@ -55,6 +55,7 @@ public:
 class Snake {
     deque<Block> blocks;
     double deltaTime = 0;
+    Rectangle deltaRect;
 
 public:
     int width;
@@ -66,7 +67,8 @@ public:
         : width{width},
           color{color},
           speed{speed},
-          dead{false} {
+          dead{false},
+          deltaRect{0, 0, 0, 0} {
         blocks.push_back({20, 400, initialLength, width, Dir::E});
     }
 
@@ -74,6 +76,11 @@ public:
         for (auto block: blocks) {
             block.draw(color);
         }
+    }
+
+    void drawDeltaRect() {
+        DrawRectangleRec(deltaRect, RED);
+        //cout << deltaRect.x << " " << deltaRect.y << " " << deltaRect.width << " " << deltaRect.height << endl;
     }
 
     void move(double currentTime);
@@ -123,28 +130,39 @@ private:
         blocks.push_back({newX, newY, width, width, newDir});
     }
 
-    Rectangle getDeltaRect(const Block& head, int d) {
+    Rectangle getDeltaRect(const Block &head, int d) {
         float newX = 0, newY = 0, w = 0, h = 0;
         if (head.direction == Dir::E || head.direction == Dir::W) {
-            newX = (head.direction == Dir::E) ? head.x + head.length -d : head.x;
+            newX = (head.direction == Dir::E) ? head.x + head.length - d : head.x;
             newY = head.y;
             w = d;
             h = head.width;
         } else if (head.direction == Dir::N || head.direction == Dir::S) {
-            newX = (head.direction == Dir::S) ? head.x + head.length -d : head.x;
-            newY = head.y;
+            newX = head.x;
+            newY = (head.direction == Dir::S) ? head.y + head.length - d : head.y;
             w = head.width;
             h = d;
         }
         return {newX, newY, w, h};
     }
 
-    bool touchedBorder(const Rectangle& dRect, int screenWidth, int screenHeight) {
-        if (dRect.x < 0 || dRect.x > screenWidth - dRect.width || dRect.y < 0 ||
-                dRect.y > screenHeight - dRect.height) { return 1; }
-        return 0;
+    bool collidedBorder(int screenWidth, int screenHeight) {
+        if (deltaRect.x < 0 || deltaRect.x > screenWidth - deltaRect.width || deltaRect.y < 0 ||
+            deltaRect.y > screenHeight - deltaRect.height) { return true; }
+        return false;
     }
 
+    bool collidedSnake(deque<Block> &bl) {
+        for (int i = 0; i < blocks.size()-1; i++) {
+            Rectangle r = bl[i].getRect();
+            if (CheckCollisionRecs(deltaRect, r)) {
+                cout << deltaRect.x << " " << deltaRect.y << " " << deltaRect.width << " " << deltaRect.height << endl;
+                cout << r.x << " " << r.y << " " << r.width << " " << r.height << endl;
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 void Snake::move(double currentTime) {
@@ -155,12 +173,13 @@ void Snake::move(double currentTime) {
 
     blocks.back().growTip(d);
 
-    while (d > 0) {
+    int cd = d;
+    while (cd > 0) {
         Block &tail = blocks.front();
         assert(tail.length > 0);
 
-        int dd = min(d, tail.length);
-        d -= dd;
+        int dd = min(cd, tail.length);
+        cd -= dd;
 
         if (tail.length <= dd) {
             blocks.pop_front();
@@ -168,9 +187,14 @@ void Snake::move(double currentTime) {
             tail.shrinkBase(dd);
         }
     }
-    Rectangle dRect = getDeltaRect(blocks.back(), d);
-    if (touchedBorder(dRect, GetScreenWidth(), GetScreenHeight())) {
+    deltaRect = getDeltaRect(blocks.back(), d);
+    if (collidedBorder(GetScreenWidth(), GetScreenHeight())) {
         dead = true;
+        return;
+    }
+    if (collidedSnake(blocks)) {
+        dead = true;
+        cout << "snake collided" << endl;
     }
 }
 
@@ -187,7 +211,7 @@ int main() {
     cout << GetScreenHeight() << " " << GetScreenWidth() << endl;
     cout << GetRenderHeight() << " " << GetRenderWidth() << endl;
 
-    Snake snake{100, 20, 50, DARKGREEN};
+    Snake snake{300, 20, 50, DARKGREEN};
     //blocks.push_back({200, 200, 100, Dir::E});
     // deque<Block> snake;
     // Dir direction{Dir::E};
@@ -201,8 +225,9 @@ int main() {
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        DrawFPS(20, 20);
+        DrawFPS(50, 50);
         snake.draw();
+        snake.drawDeltaRect();
         EndDrawing();
     }
 
