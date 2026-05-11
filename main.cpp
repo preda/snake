@@ -261,20 +261,20 @@ Rectangle Snake::move(double currentTime, Apples& apples) {
 
 int main() {
     InitWindow(0, 0, "snake");
-    SetTargetFPS(30);
+    SetTargetFPS(60);
 
     int highscore = 0;
 
     //double speed = 100; // pixels per second
 
-    SetWindowState(FLAG_WINDOW_UNDECORATED);
-    //SetConfigFlags(FLAG_WINDOW_HIGHDPI);
+    // SetWindowState(FLAG_WINDOW_UNDECORATED);
+    SetConfigFlags(FLAG_WINDOW_UNDECORATED);
     // MaximizeWindow();
     cout << IsWindowMaximized() << endl;
     cout << GetScreenHeight() << " " << GetScreenWidth() << endl;
     cout << GetRenderHeight() << " " << GetRenderWidth() << endl;
 
-    Snake snake{300, 20, 50, DARKGREEN};
+    Snake snake{300, 20, 100, DARKGREEN};
     vector<Apple> apples;
     apples.push_back({300, 300});
 
@@ -295,7 +295,7 @@ int main() {
             deltaRect = snake.move(frameTime, apples);
         }
         snake.draw();
-        DrawRectangleRec(deltaRect, RED);
+        //DrawRectangleRec(deltaRect, RED);
         DrawText(("highscore: "s + to_string(highscore)).c_str(), 10, 40, 25, BLUE);
         snake.drawScore(10, 70, 25, PINK);
 
