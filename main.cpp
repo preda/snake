@@ -96,7 +96,7 @@ public:
           color{color},
           speed{speed},
           dead{false} {
-        blocks.push_back({20, 400, initialLength, width, Dir::E});
+        blocks.push_back({20, 100, initialLength, width, Dir::E});
     }
 
     void draw() {
@@ -137,7 +137,7 @@ public:
         deltaTime = 0;
         dead = false;
         score = 0;
-        blocks.push_back({20, 400, initialLength, width, Dir::E});
+        blocks.push_back({20, 120, initialLength, width, Dir::E});
         return highscore;
     }
 
@@ -244,8 +244,8 @@ Rectangle Snake::move(double currentTime, Apples& apples) {
             apples.pop_back();
             --i;
 
-            float newX = rand() % (screenWidth - 10);
-            float newY = rand() % (screenHeight - 10);
+            float newX = rand() % (screenWidth - 20) + 10;
+            float newY = rand() % (screenHeight - 20) + 10;
             apples.push_back({newX, newY});
         }
     }
@@ -261,23 +261,23 @@ Rectangle Snake::move(double currentTime, Apples& apples) {
 }
 
 int main() {
-    InitWindow(0, 0, "snake");
-    SetTargetFPS(60);
+    cout << "Monitor: " << GetMonitorWidth(0) << " x " << GetMonitorHeight(0) << endl;
+
+    InitWindow(GetMonitorWidth(0) / 2, GetMonitorHeight(0) / 2, "snake");
+    SetTargetFPS(30);
 
     int highscore = 0;
 
-    //double speed = 100; // pixels per second
-
     // SetWindowState(FLAG_WINDOW_UNDECORATED);
     SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-    // MaximizeWindow();
+    MaximizeWindow();
     cout << IsWindowMaximized() << endl;
-    cout << GetScreenHeight() << " " << GetScreenWidth() << endl;
-    cout << GetRenderHeight() << " " << GetRenderWidth() << endl;
+    cout << "Screen:  " << GetScreenWidth() << " x " << GetScreenHeight() << endl;
+    cout << "Render:  " << GetRenderWidth() << " x " << GetRenderHeight() << endl;
 
     Snake snake{300, 20, 120, DARKGREEN};
     vector<Apple> apples;
-    apples.push_back({300, 300});
+    apples.push_back(Apple(GetScreenWidth() / 2, GetScreenHeight() / 2));
 
     while (!WindowShouldClose()) {
         double frameTime = GetFrameTime();
