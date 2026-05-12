@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSharedSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Emscripten" ENABLED="true" GENERATION_DIR="build-emscripten" CONFIG_NAME="Release" GENERATION_OPTIONS="cmake -S . -B build -G Ninja -DPLATFORM=Web &quot;-DCMAKE_TOOLCHAIN_FILE=~/emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake&quot;" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="build-debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+</project>
